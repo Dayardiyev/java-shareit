@@ -2,20 +2,19 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-import ru.practicum.shareit.exception.FieldNotFilledException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidateException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.validation.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
-@Validated
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepository repository;
 
     @Override
@@ -25,7 +24,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(long id) {
-        return repository.findById(id);
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id=" + id + " не найден"));
     }
 
     @Override
@@ -34,20 +33,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User create(@Valid User user) {
-        if (user.getEmail() == null) {
-            throw new FieldNotFilledException("Почта не заполнена");
-        }
+    public User create(User user) {
         isAlreadyExistsEmail(user.getEmail());
         return repository.create(user);
     }
 
     @Override
-    public User update(long id, @Valid User user) {
+    public User update(long id, User user) {
         if (user.getEmail() != null) {
             validateUniqueEmail(id, user.getEmail());
         }
-        return repository.update(id, user);
+
+        Optional<User> optionalUser = repository.findById(id);
+        User previousUser = optionalUser
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден!", id)));
+
+        User updatedUser = User.builder()
+                .id(id)
+                .name(Objects.requireNonNullElse(user.getName(), previousUser.getName()))
+                .email(Objects.requireNonNullElse(user.getEmail(), previousUser.getEmail()))
+                .build();
+
+        return repository.update(id, updatedUser);
     }
 
     private void validateUniqueEmail(long id, String email) {

@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.repository;
 
 
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -17,23 +16,13 @@ public class UserRepositoryImpl implements UserRepository {
         users = new HashMap<>();
     }
 
+    @Override
     public User update(long userId, User user) {
-        User previousUser = users.get(userId);
-        if (previousUser == null) {
-            throw new NotFoundException(String.format("Пользователь с id=%d не найден!", userId));
-        }
-
-        User updatedUser = User.builder()
-                .id(userId)
-                .name(Objects.requireNonNullElse(user.getName(), previousUser.getName()))
-                .email(Objects.requireNonNullElse(user.getEmail(), previousUser.getEmail()))
-                .build();
-
-        users.put(userId, updatedUser);
-        return updatedUser;
+        users.put(userId, user);
+        return user;
     }
 
-
+    @Override
     public Optional<User> findByEmail(String email) {
         return users.values().stream()
                 .filter(u -> email.equals(u.getEmail()))
@@ -45,6 +34,7 @@ public class UserRepositoryImpl implements UserRepository {
         users.remove(userId);
     }
 
+    @Override
     public User create(User user) {
         long id = getUniqueId();
         user.setId(id);
@@ -52,12 +42,14 @@ public class UserRepositoryImpl implements UserRepository {
         return user;
     }
 
+    @Override
     public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 
-    public User findById(long userId) {
-        return users.get(userId);
+    @Override
+    public Optional<User> findById(long userId) {
+        return Optional.ofNullable(users.get(userId));
     }
 
     private long getUniqueId() {

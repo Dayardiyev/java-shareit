@@ -1,12 +1,12 @@
 package ru.practicum.shareit.item.controller;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -15,45 +15,44 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService service;
-    private final String userHeader = "X-Sharer-User-Id";
-
+    private final String USER_HEADER = "X-Sharer-User-Id";
 
     @GetMapping
-    public List<Item> findAllByUserId(@RequestHeader(userHeader) Long userId) {
+    public List<ItemDto> findAllByUserId(@RequestHeader(USER_HEADER) Long userId) {
         log.info("GET userId={} /items", userId);
         return service.findAllByUserId(userId);
     }
 
     @GetMapping("{itemId}")
-    public Item findByItemId(
+    public ItemDto findByItemId(
             @PathVariable long itemId
     ) {
         log.info("GET /items/{}", itemId);
-        return service.findByItemId(itemId);
+        return service.findById(itemId);
     }
 
     @PostMapping
-    public Item create(
-            @RequestHeader(userHeader) Long userId,
-            @RequestBody Item item
+    public ItemDto create(
+            @RequestHeader(USER_HEADER) Long userId,
+            @RequestBody @Valid ItemDto itemDto
     ) {
         log.info("POST userId={} /items", userId);
-        return service.create(userId, item);
+        return service.create(userId, itemDto);
     }
 
     @PatchMapping("{itemId}")
-    public Item update(
-            @RequestHeader(userHeader) Long userId,
+    public ItemDto update(
+            @RequestHeader(USER_HEADER) Long userId,
             @PathVariable long itemId,
-            @RequestBody Item item
+            @RequestBody ItemDto itemDto
     ) {
         log.info("PATCH userId={} /items/{}", userId, itemId);
-        return service.update(userId, itemId, item);
+        return service.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/search")
-    public List<Item> findAllByName(
-            @RequestHeader(userHeader) Long userId,
+    public List<ItemDto> findAllByName(
+            @RequestHeader(USER_HEADER) Long userId,
             @RequestParam String text
     ) {
         log.info("GET userId={} /items/search?text={}", userId, text);

@@ -10,7 +10,7 @@ public interface UserRepository {
 
     List<User> findAll();
 
-    User findById(long id);
+    Optional<User> findById(long id);
 
     User update(long userId, User user);
 
