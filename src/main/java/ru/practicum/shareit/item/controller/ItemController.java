@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.constants.Constants;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -15,10 +16,9 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService service;
-    private static final String USER_HEADER = "X-Sharer-User-Id";
 
     @GetMapping
-    public List<ItemDto> findAllByUserId(@RequestHeader(USER_HEADER) Long userId) {
+    public List<ItemDto> findAllByUserId(@RequestHeader(Constants.USER_HEADER) Long userId) {
         log.info("GET userId={} /items", userId);
         return service.findAllByUserId(userId);
     }
@@ -33,7 +33,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(
-            @RequestHeader(USER_HEADER) Long userId,
+            @RequestHeader(Constants.USER_HEADER) Long userId,
             @RequestBody @Valid ItemDto itemDto
     ) {
         log.info("POST userId={} /items", userId);
@@ -42,7 +42,7 @@ public class ItemController {
 
     @PatchMapping("{itemId}")
     public ItemDto update(
-            @RequestHeader(USER_HEADER) Long userId,
+            @RequestHeader(Constants.USER_HEADER) Long userId,
             @PathVariable long itemId,
             @RequestBody ItemDto itemDto
     ) {
@@ -52,7 +52,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> findAllByName(
-            @RequestHeader(USER_HEADER) Long userId,
+            @RequestHeader(Constants.USER_HEADER) Long userId,
             @RequestParam String text
     ) {
         log.info("GET userId={} /items/search?text={}", userId, text);
