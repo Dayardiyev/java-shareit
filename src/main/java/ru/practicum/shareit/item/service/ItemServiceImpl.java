@@ -67,16 +67,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto findById(long itemId) {
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new NotFoundException("Элемент с id=" + itemId + " не найден");
-        }
-        return ItemMapper.toItemDto(optionalItem.get());
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Элемент с id=" + itemId + " не найден"));
+        return ItemMapper.toItemDto(item);
     }
 
     private User checkIfUserExists(long userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        return optionalUser
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", userId)));
     }
 }
