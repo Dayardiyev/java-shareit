@@ -1,4 +1,4 @@
-package ru.practicum.shareit.constants;
+package ru.practicum.shareit.common;
 
 import lombok.experimental.UtilityClass;
 

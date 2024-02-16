@@ -1,25 +1,26 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.experimental.UtilityClass;
+import org.mapstruct.Context;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.common.dto.AbstractMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
-@UtilityClass
-public class ItemMapper {
-    public static ItemDto toItemDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface ItemMapper extends AbstractMapper<Item, ItemResponse, ItemCreateRequest, ItemUpdateRequest> {
 
-    public static Item toItem(ItemDto itemDto) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .available(itemDto.getAvailable())
-                .build();
-    }
+    @Mapping(target = "nextBooking",
+            expression = "java(entity.getOwner().getId().equals(userId) ? mapToBookingView(entity.getNextBooking()) : null)")
+    @Mapping(target = "lastBooking",
+            expression = "java(entity.getOwner().getId().equals(userId) ? mapToBookingView(entity.getLastBooking()) : null)")
+    ItemResponse mapToResponseEntity(Item entity, @Context long userId);
+
+    @Mapping(source = "booker.id", target = "bookerId")
+    ItemResponse.BookingView mapToBookingView(Booking booking);
+
+    @Mapping(source = "author.name", target = "authorName")
+    @Mapping(target = "created", source = "comment.createdAt")
+    CommentResponse mapToResponseEntity(Comment comment);
 }

@@ -1,19 +1,16 @@
-package ru.practicum.shareit.user.model;
+package ru.practicum.shareit.user.dto;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.common.AbstractEntity;
-
-import javax.persistence.*;
 
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity
-@Table(name = "users")
-public class User extends AbstractEntity {
+public class UserResponse {
+
+    Long id;
 
     String name;
 
