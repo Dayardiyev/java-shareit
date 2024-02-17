@@ -12,6 +12,9 @@ public class ValidTimeRangeValidator implements ConstraintValidator<ValidTimeRan
 
     @Override
     public boolean isValid(BookingCreateRequest request, ConstraintValidatorContext context) {
+        if (request == null) {
+            return false;
+        }
         LocalDateTime start = request.getStart();
         LocalDateTime end = request.getEnd();
 
