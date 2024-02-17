@@ -2,79 +2,61 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.common.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final ItemMapper mapper;
 
     @Override
-    public List<ItemDto> findAllByUserId(long userId) {
-        return itemRepository.findAllByUserId(userId)
-                .stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<ItemResponse> findAllByUserId(long userId) {
+        return mapper.mapToResponseEntity(itemRepository.findAllByOwnerIdOrderById(userId));
     }
 
     @Override
-    public ItemDto create(long userId, ItemDto itemDto) {
-        User user = checkIfUserExists(userId);
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(user);
-        item = itemRepository.create(userId, item);
-        return ItemMapper.toItemDto(item);
+    public ItemResponse create(long userId, ItemCreateRequest itemCreateRequest) {
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
+
+        Item item = mapper.mapFromCreateRequestDto(itemCreateRequest);
+        item.setOwner(owner);
+        return mapper.mapToResponseEntity(itemRepository.save(item));
     }
 
     @Override
-    public ItemDto update(long userId, long itemId, ItemDto itemDto) {
-        checkIfUserExists(userId);
+    public ItemResponse update(long userId, long itemId, ItemUpdateRequest itemUpdate) {
+        Item savedItem = itemRepository.findByIdAndOwnerId(itemId, userId)
+                .orElseThrow(() -> new NotFoundException("Вещь пользователя " + userId + " с id " + itemId + " не найден"));
 
-        Item previousItem = itemRepository.findByUserIdAndItemId(userId, itemId);
+        mapper.merge(savedItem, mapper.mapFromUpdateRequestDto(itemUpdate));
+        savedItem = itemRepository.save(savedItem);
 
-        Item updatedItem = Item.builder()
-                .id(itemId)
-                .name(Objects.requireNonNullElse(itemDto.getName(), previousItem.getName()))
-                .description(Objects.requireNonNullElse(itemDto.getDescription(), previousItem.getDescription()))
-                .available(Objects.requireNonNullElse(itemDto.getAvailable(), previousItem.getAvailable()))
-                .build();
-
-        Item item = itemRepository.update(userId, itemId, updatedItem);
-        return ItemMapper.toItemDto(item);
+        return mapper.mapToResponseEntity(savedItem);
     }
 
     @Override
-    public List<ItemDto> findAllByName(long userId, String text) {
-        if (text.isBlank()) {
-            return Collections.emptyList();
-        }
-        text = text.toLowerCase();
-        return itemRepository.findAllByName(userId, text)
-                .stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<ItemResponse> findAllByName(String text) {
+        List<Item> items = itemRepository.findAllByNameContainingIgnoreCase(text);
+
+        return mapper.mapToResponseEntity(items);
     }
 
     @Override
-    public ItemDto findById(long itemId) {
+    public ItemResponse findById(long itemId, long userId) {
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Элемент с id=" + itemId + " не найден"));
-        return ItemMapper.toItemDto(item);
-    }
+                .orElseThrow(() -> new NotFoundException("Вещь с id=" + itemId + " не найден"));
 
-    private User checkIfUserExists(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", userId)));
+        return mapper.mapToResponseEntity(item, userId);
     }
 }
 
