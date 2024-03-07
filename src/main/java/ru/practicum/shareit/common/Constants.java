@@ -1,8 +1,6 @@
 package ru.practicum.shareit.common;
 
 import lombok.experimental.UtilityClass;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @UtilityClass
 public class Constants {
