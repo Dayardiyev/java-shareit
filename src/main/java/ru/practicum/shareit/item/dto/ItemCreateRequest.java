@@ -21,4 +21,6 @@ public class ItemCreateRequest {
 
     @NotNull(message = "Признак доступности вещи не может быть пустым.")
     Boolean available;
+
+    Long requestId;
 }

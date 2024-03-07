@@ -23,6 +23,9 @@ public class Item extends AbstractEntity {
 
     Boolean available;
 
+    @Column(name = "request_id")
+    Long requestId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     User owner;
 

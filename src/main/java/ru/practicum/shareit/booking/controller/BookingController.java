@@ -2,23 +2,30 @@ package ru.practicum.shareit.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingCreateRequest;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingResponse;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
-import static ru.practicum.shareit.common.Constants.USER_HEADER;
+import static ru.practicum.shareit.common.Constants.*;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
+    private final BookingMapper mapper;
 
     /**
      * Получение бронирования по идентификатору
@@ -34,7 +41,7 @@ public class BookingController {
             @PathVariable Long bookingId
     ) {
         log.info("Получение бронирования по идентификатору {} пользователем {}", bookingId, userId);
-        return bookingService.findByUserIdAndId(bookingId, userId);
+        return mapper.mapToResponseEntity(bookingService.findByUserIdAndId(bookingId, userId));
     }
 
     /**
@@ -56,10 +63,13 @@ public class BookingController {
     @GetMapping
     public List<BookingResponse> findAllByBookerId(
             @RequestHeader(USER_HEADER) Long bookerId,
-            @RequestParam(defaultValue = "ALL") String state
+            @RequestParam(value = "state", defaultValue = "ALL") BookingState state,
+            @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
+            @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
+
     ) {
         log.info("Получение списка по бронированию пользователя {}", bookerId);
-        return bookingService.findAllByBookerId(bookerId, state);
+        return mapper.mapToResponseEntity(bookingService.findAllByBookerId(bookerId, state, from, size));
     }
 
     /**
@@ -81,10 +91,12 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingResponse> findAllByOwnerId(
             @RequestHeader(USER_HEADER) Long ownerId,
-            @RequestParam(defaultValue = "ALL") String state
+            @RequestParam(value = "state", defaultValue = "ALL") BookingState state,
+            @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
+            @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
     ) {
         log.info("Получение списка по бронированию владельца предмета ownerId={}", ownerId);
-        return bookingService.findAllByOwnerId(ownerId, state);
+        return mapper.mapToResponseEntity(bookingService.findAllByOwnerId(ownerId, state, from, size));
     }
 
     /**
@@ -100,7 +112,9 @@ public class BookingController {
             @RequestBody @Valid BookingCreateRequest bookingCreateRequest
     ) {
         log.info("Создание бронирования пользователем с id={}", bookerId);
-        return bookingService.create(bookerId, bookingCreateRequest);
+        return mapper.mapToResponseEntity(
+                bookingService.create(bookerId, mapper.mapFromCreateRequestDto(bookingCreateRequest))
+        );
     }
 
     /**
@@ -118,6 +132,6 @@ public class BookingController {
             @RequestParam(name = "approved") Boolean available
     ) {
         log.info("Подтверждение или отклонение бронирования владельцем={} статус={}", ownerId, available);
-        return bookingService.approve(ownerId, bookingId, available);
+        return mapper.mapToResponseEntity(bookingService.approve(ownerId, bookingId, available));
     }
 }

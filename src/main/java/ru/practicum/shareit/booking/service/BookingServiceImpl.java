@@ -1,10 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingCreateRequest;
-import ru.practicum.shareit.booking.dto.BookingMapper;
-import ru.practicum.shareit.booking.dto.BookingResponse;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.Status;
@@ -22,75 +21,82 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
-    private final BookingMapper mapper;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
     @Override
-    public List<BookingResponse> findAllByBookerId(long userId, String stateParam) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден!"));
+    public List<Booking> findAllByBookerId(long userId, BookingState state, int from, int size) {
+        getUserById(userId);
 
         LocalDateTime time = LocalDateTime.now();
-        BookingState state = BookingState.parse(stateParam);
 
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        Page<Booking> page;
         switch (state) {
             case ALL:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByBookerIdOrderByStartDesc(userId));
+                page = bookingRepository.findAllByBookerIdOrderByStartDesc(userId, pageRequest);
+                break;
             case FUTURE:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId, time));
+                page = bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId, time, pageRequest);
+                break;
             case PAST:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(userId, time));
+                page = bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(userId, time, pageRequest);
+                break;
             case CURRENT:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, time));
+                page = bookingRepository.findAllByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, time, pageRequest);
+                break;
             default:
-                Status status = Status.valueOf(stateParam);
-                return mapper.mapToResponseEntity(bookingRepository.findAllByBookerIdAndStatusIs(userId, status));
+                Status status = Status.valueOf(state.name());
+                page = bookingRepository.findAllByBookerIdAndStatusIs(userId, status, pageRequest);
+                break;
         }
+        return page.getContent();
     }
 
     @Override
-    public List<BookingResponse> findAllByOwnerId(long ownerId, String stateParam) {
-        userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + ownerId + " не найден!"));
+    public List<Booking> findAllByOwnerId(long ownerId, BookingState state, int from, int size) {
+        getUserById(ownerId);
 
         LocalDateTime time = LocalDateTime.now();
-        BookingState state = BookingState.parse(stateParam);
 
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        Page<Booking> page;
         switch (state) {
             case ALL:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId));
+                page = bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId, pageRequest);
+                break;
             case FUTURE:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(ownerId, time));
+                page = bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(ownerId, time, pageRequest);
+                break;
             case PAST:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByItemOwnerIdAndEndIsBeforeOrderByStartDesc(ownerId, time));
+                page = bookingRepository.findAllByItemOwnerIdAndEndIsBeforeOrderByStartDesc(ownerId, time, pageRequest);
+                break;
             case CURRENT:
-                return mapper.mapToResponseEntity(bookingRepository.findAllByOwnerIdCurrent(ownerId, time));
+                page = bookingRepository.findAllByOwnerIdCurrent(ownerId, time, pageRequest);
+                break;
             default:
-                Status status = Status.valueOf(stateParam);
-                return mapper.mapToResponseEntity(bookingRepository.findAllByItemOwnerIdAndStatusIs(ownerId, status));
+                Status status = Status.valueOf(state.name());
+                page = bookingRepository.findAllByItemOwnerIdAndStatusIs(ownerId, status, pageRequest);
+                break;
         }
+        return page.getContent();
     }
 
     @Override
-    public BookingResponse findByUserIdAndId(long bookingId, long userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден!"));
+    public Booking findByUserIdAndId(long bookingId, long userId) {
+        getUserById(userId);
 
-        Booking booking = bookingRepository.findByIdAndItemOwnerIdOrderByStartDesc(bookingId, userId)
+        return bookingRepository.findByIdAndItemOwnerIdOrderByStartDesc(bookingId, userId)
                 .orElseGet(() -> bookingRepository.findByIdAndBookerId(bookingId, userId)
                         .orElseThrow(() -> new NotFoundException("Для пользователя с id=" + bookingId + " не найден бронь с id=" + bookingId)));
-
-        return mapper.mapToResponseEntity(booking);
     }
 
     @Override
-    public BookingResponse create(long bookerId, BookingCreateRequest bookingCreateRequest) {
+    public Booking create(long bookerId, Booking booking) {
 
-        User booker = userRepository.findById(bookerId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + bookerId + " не найден!"));
+        User booker = getUserById(bookerId);
 
-        long itemId = bookingCreateRequest.getItemId();
+        long itemId = booking.getItem().getId();
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с id=" + itemId + " не найден!"));
 
@@ -102,19 +108,15 @@ public class BookingServiceImpl implements BookingService {
             throw new NotAvailableException("Вещь не доступен для бронирования");
         }
 
-        Booking booking = mapper.mapFromCreateRequestDto(bookingCreateRequest);
-
         booking.setItem(item);
         booking.setBooker(booker);
         booking.setStatus(Status.WAITING);
-        bookingRepository.save(booking);
-        return mapper.mapToResponseEntity(booking);
+        return bookingRepository.save(booking);
     }
 
     @Override
-    public BookingResponse approve(long ownerId, long bookingId, boolean approved) {
-        User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + ownerId + " не найден!"));
+    public Booking approve(long ownerId, long bookingId, boolean approved) {
+        User owner = getUserById(ownerId);
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id=" + bookingId + " не найден!"));
@@ -128,12 +130,13 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Пользователь с id=" + ownerId + " не является владельцем вещи с id=" + item.getId() + "!");
         }
 
-        if (approved) {
-            booking.setStatus(Status.APPROVED);
-        } else {
-            booking.setStatus(Status.REJECTED);
-        }
+        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
 
-        return mapper.mapToResponseEntity(bookingRepository.save(booking));
+        return bookingRepository.save(booking);
+    }
+
+    private User getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден!"));
     }
 }

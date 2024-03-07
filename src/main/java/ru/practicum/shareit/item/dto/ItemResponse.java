@@ -20,6 +20,8 @@ public class ItemResponse {
 
     Boolean available;
 
+    Long requestId;
+
     BookingView lastBooking;
 
     BookingView nextBooking;
