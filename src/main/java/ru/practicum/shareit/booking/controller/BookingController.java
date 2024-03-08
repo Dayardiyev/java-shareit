@@ -48,7 +48,7 @@ public class BookingController {
      * Получение списка по бронированию пользователя
      *
      * @param bookerId идентификатор пользователя
-     * @param state состояние бронирования, возможные значения
+     * @param stateFilter состояние бронирования, возможные значения
      *              <ul>
      *                  <li>ALL</li>
      *                  <li>CURRENT</li>
@@ -63,12 +63,13 @@ public class BookingController {
     @GetMapping
     public List<BookingResponse> findAllByBookerId(
             @RequestHeader(USER_HEADER) Long bookerId,
-            @RequestParam(value = "state", defaultValue = "ALL") BookingState state,
+            @RequestParam(value = "state", defaultValue = "ALL") String stateFilter,
             @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
             @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
 
     ) {
         log.info("Получение списка по бронированию пользователя {}", bookerId);
+        BookingState state = BookingState.parse(stateFilter);
         return mapper.mapToResponseEntity(bookingService.findAllByBookerId(bookerId, state, from, size));
     }
 
@@ -76,7 +77,7 @@ public class BookingController {
      * Получение списка по бронированию владельца предмета
      *
      * @param ownerId идентификатор владельца предмета
-     * @param state состояние бронирования, возможные значения
+     * @param stateFilter состояние бронирования, возможные значения
      *              <ul>
      *                  <li>ALL</li>
      *                  <li>CURRENT</li>
@@ -91,11 +92,12 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingResponse> findAllByOwnerId(
             @RequestHeader(USER_HEADER) Long ownerId,
-            @RequestParam(value = "state", defaultValue = "ALL") BookingState state,
+            @RequestParam(value = "state", defaultValue = "ALL") String stateFilter,
             @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
             @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
     ) {
         log.info("Получение списка по бронированию владельца предмета ownerId={}", ownerId);
+        BookingState state = BookingState.parse(stateFilter);
         return mapper.mapToResponseEntity(bookingService.findAllByOwnerId(ownerId, state, from, size));
     }
 

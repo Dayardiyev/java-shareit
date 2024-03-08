@@ -27,6 +27,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -137,11 +138,21 @@ public class BookingControllerTest {
         when(bookingService.findAllByBookerId(userId, stateFilter, from, size))
                 .thenReturn(List.of(booking));
 
-        List<BookingResponse> response = bookingController.findAllByBookerId(userId, stateFilter, from, size);
+        List<BookingResponse> response = bookingController.findAllByBookerId(userId, stateFilter.toString(), from, size);
 
         assertThat(response, hasSize(1));
         assertThat(response.get(0).getStatus(), equalTo(booking.getStatus()));
         verify(bookingService).findAllByBookerId(userId, stateFilter, from, size);
+    }
+
+    @Test
+    void getByBooker_whenWrongState_thenExceptionThrown() {
+        long userId = 0L;
+        String stateFilter = "UNKNOWN STATE";
+        int from = 0;
+        int size = 50;
+
+        assertThrows(IllegalArgumentException.class, () -> bookingController.findAllByBookerId(userId, stateFilter, from, size));
     }
 
     @Test
@@ -153,10 +164,20 @@ public class BookingControllerTest {
         when(bookingService.findAllByOwnerId(userId, stateFilter, from, size))
                 .thenReturn(List.of(booking));
 
-        List<BookingResponse> response = bookingController.findAllByOwnerId(userId, stateFilter, from, size);
+        List<BookingResponse> response = bookingController.findAllByOwnerId(userId, stateFilter.toString(), from, size);
 
         assertThat(response, hasSize(1));
         assertThat(response.get(0).getStatus(), equalTo(booking.getStatus()));
         verify(bookingService).findAllByOwnerId(userId, stateFilter, from, size);
+    }
+
+    @Test
+    void getByOwner_whenWrongState_thenExceptionThrown() {
+        long userId = 0L;
+        String stateFilter = "UNKNOWN STATE";
+        int from = 0;
+        int size = 50;
+
+        assertThrows(IllegalArgumentException.class, () -> bookingController.findAllByOwnerId(userId, stateFilter, from, size));
     }
 }
