@@ -436,7 +436,7 @@ class BookingControllerIT {
         String invalidState = "RANDOM STATE";
         long from = 0;
         int size = 50;
-        String errorMessage = "No enum constant";
+        String errorMessage = "Unknown state: " + invalidState;
 
         mockMvc.perform(get("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -547,7 +547,7 @@ class BookingControllerIT {
         String invalidState = "RANDOM STATE";
         int from = 0;
         int size = 50;
-        String errorMessage = "No enum constant";
+        String errorMessage = "Unknown state: " + invalidState;
 
         mockMvc.perform(get("/bookings/owner")
                         .contentType(MediaType.APPLICATION_JSON)

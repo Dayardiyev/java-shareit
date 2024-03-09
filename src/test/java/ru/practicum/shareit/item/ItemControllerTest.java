@@ -14,7 +14,6 @@ import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 
@@ -32,9 +31,6 @@ class ItemControllerTest {
 
     @Mock
     private ItemService itemService;
-
-    @Mock
-    private CommentService commentService;
 
     @InjectMocks
     private ItemController controller;
@@ -155,12 +151,12 @@ class ItemControllerTest {
         long userId = 1L;
         long itemId = 1L;
 
-        when(commentService.addComment(anyLong(), anyLong(), any()))
+        when(itemService.addComment(anyLong(), anyLong(), any()))
                 .thenReturn(comment);
 
         CommentResponse response = controller.createComment(userId, itemId, commentCreateRequest);
 
         assertThat(response.getText(), equalTo(commentCreateRequest.getText()));
-        verify(commentService).addComment(anyLong(), anyLong(), any());
+        verify(itemService).addComment(anyLong(), anyLong(), any());
     }
 }
