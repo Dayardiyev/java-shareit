@@ -27,10 +27,12 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -81,12 +83,14 @@ class ItemServiceTest {
         int from = 0;
         int size = 10;
 
+        List<Item> expectedItemList = Collections.singletonList(item);
         when(itemRepository.findAllByOwnerIdOrderById(anyLong(), any()))
-                .thenReturn(new PageImpl<>(List.of(item)));
+                .thenReturn(new PageImpl<>(expectedItemList));
 
-        itemService.findAllByUserId(userId, from, size);
+        List<Item> actualItemList = itemService.findAllByUserId(userId, from, size);
 
         verify(itemRepository).findAllByOwnerIdOrderById(anyLong(), any());
+        assertEquals(expectedItemList, actualItemList);
     }
 
     @Test
@@ -96,9 +100,10 @@ class ItemServiceTest {
         when(itemRepository.findById(itemId))
                 .thenReturn(Optional.of(item));
 
-        itemService.findById(itemId);
+        Item actualItem = itemService.findById(itemId);
 
         verify(itemRepository).findById(itemId);
+        assertEquals(item, actualItem);
     }
 
     @Test

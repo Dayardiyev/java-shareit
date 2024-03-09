@@ -18,7 +18,6 @@ import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 
@@ -44,9 +43,6 @@ class ItemControllerIT {
 
     @MockBean
     private ItemService itemService;
-
-    @MockBean
-    private CommentService commentService;
 
     private ItemCreateRequest itemCreateRequest;
     private ItemUpdateRequest itemUpdateRequest;
@@ -508,7 +504,7 @@ class ItemControllerIT {
         long userId = 1L;
         long itemId = 1L;
 
-        when(commentService.addComment(anyLong(), anyLong(), any()))
+        when(itemService.addComment(anyLong(), anyLong(), any()))
                 .thenReturn(comment);
 
         mockMvc.perform(post("/items/{itemId}/comment", itemId)
@@ -523,7 +519,7 @@ class ItemControllerIT {
                 .andExpect(jsonPath("$.text", equalTo(comment.getText())))
                 .andExpect(jsonPath("$.created", equalTo(comment.getCreatedAt())));
 
-        verify(commentService).addComment(anyLong(), anyLong(), any());
+        verify(itemService).addComment(anyLong(), anyLong(), any());
     }
 
     @SneakyThrows
@@ -534,7 +530,7 @@ class ItemControllerIT {
         String errorMessage =
                 "Required request header 'X-Sharer-User-Id' for method parameter type Long is not present";
 
-        when(commentService.addComment(anyLong(), anyLong(), any()))
+        when(itemService.addComment(anyLong(), anyLong(), any()))
                 .thenReturn(comment);
 
         mockMvc.perform(post("/items/{itemId}/comment", itemId)
@@ -545,7 +541,7 @@ class ItemControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString(errorMessage)));
 
-        verify(commentService, never()).addComment(anyLong(), anyLong(), any());
+        verify(itemService, never()).addComment(anyLong(), anyLong(), any());
     }
 
     @SneakyThrows
@@ -556,7 +552,7 @@ class ItemControllerIT {
         String errorMessage = "Текст комментарий не должен быть пустым";
         commentCreateRequest.setText(null);
 
-        when(commentService.addComment(anyLong(), anyLong(), any()))
+        when(itemService.addComment(anyLong(), anyLong(), any()))
                 .thenReturn(comment);
 
         mockMvc.perform(post("/items/{itemId}/comment", itemId)
@@ -568,7 +564,7 @@ class ItemControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
 
-        verify(commentService, never()).addComment(anyLong(), anyLong(), any());
+        verify(itemService, never()).addComment(anyLong(), anyLong(), any());
     }
 
     @SneakyThrows
@@ -579,7 +575,7 @@ class ItemControllerIT {
         String errorMessage = "Текст комментарий не должен быть пустым";
         commentCreateRequest.setText(" ");
 
-        when(commentService.addComment(anyLong(), anyLong(), any()))
+        when(itemService.addComment(anyLong(), anyLong(), any()))
                 .thenReturn(comment);
 
         mockMvc.perform(post("/items/{itemId}/comment", itemId)
@@ -590,7 +586,7 @@ class ItemControllerIT {
                         .content(objectMapper.writeValueAsString(commentCreateRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-        verify(commentService, never()).addComment(anyLong(), anyLong(), any());
+        verify(itemService, never()).addComment(anyLong(), anyLong(), any());
     }
 
     @SneakyThrows
@@ -599,7 +595,7 @@ class ItemControllerIT {
         long userId = 1L;
         long itemId = 1L;
 
-        when(commentService.addComment(anyLong(), anyLong(), any()))
+        when(itemService.addComment(anyLong(), anyLong(), any()))
                 .thenThrow(BadRequestException.class);
 
         mockMvc.perform(post("/items/{itemId}/comment", itemId)
@@ -610,6 +606,6 @@ class ItemControllerIT {
                         .content(objectMapper.writeValueAsString(commentCreateRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(commentService).addComment(anyLong(), anyLong(), any());
+        verify(itemService).addComment(anyLong(), anyLong(), any());
     }
 }

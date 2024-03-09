@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -23,8 +22,6 @@ import static ru.practicum.shareit.common.Constants.*;
 public class ItemController {
 
     private final ItemService service;
-
-    private final CommentService commentService;
 
     private final ItemMapper itemMapper;
 
@@ -132,7 +129,7 @@ public class ItemController {
     ) {
         log.info("Создание комментарий для предмета {}", itemId);
         return commentMapper.mapToResponseEntity(
-                commentService.addComment(userId, itemId, commentMapper.mapFromCreateRequestDto(commentCreateRequest))
+                service.addComment(userId, itemId, commentMapper.mapFromCreateRequestDto(commentCreateRequest))
         );
     }
 }
