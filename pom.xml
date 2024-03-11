@@ -191,6 +191,12 @@
                     <version>0.8.8</version>
                     <configuration>
                         <output>file</output>
+                        <excludes>
+                            <exclude>**/*MapperImpl.class</exclude>
+                            <exclude>**/GlobalExceptionHandler.class</exclude>
+                            <exclude>**/ValidTimeRangeValidator.class</exclude>
+                            <exclude>**/BookingState.class</exclude>
+                        </excludes>
                     </configuration>
                     <executions>
                         <execution>

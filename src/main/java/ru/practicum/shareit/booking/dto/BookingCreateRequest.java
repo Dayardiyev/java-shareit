@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @ValidTimeRange
 public class BookingCreateRequest {
 
+    @NotNull(message = "Идентификатор вещи не может быть пустым.")
     Long itemId;
 
     @FutureOrPresent(message = "Дата начала бронирования должна быть в настоящем или будущем")
