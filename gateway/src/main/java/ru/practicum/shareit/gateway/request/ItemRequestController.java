@@ -21,6 +21,7 @@ import static ru.practicum.shareit.server.common.Constants.*;
 public class ItemRequestController {
 
     private final ItemRequestClient client;
+
     /**
      * Получение списка запросов по автору
      *
@@ -39,8 +40,8 @@ public class ItemRequestController {
      * Получение всех запросов для пользователя
      *
      * @param userId идентификатор пользователя
-     * @param from стартовый индекс пагинаций
-     * @param size размер страницы
+     * @param from   стартовый индекс пагинаций
+     * @param size   размер страницы
      * @return найденные запросы
      */
     @GetMapping("/all")
@@ -56,7 +57,7 @@ public class ItemRequestController {
     /**
      * Получение запроса по идентификатору
      *
-     * @param userId идентификатор пользователя
+     * @param userId    идентификатор пользователя
      * @param requestId идентификатор запроса
      * @return найденный запрос
      */
@@ -72,7 +73,7 @@ public class ItemRequestController {
     /**
      * Создание запроса
      *
-     * @param userId идентификатор пользователя
+     * @param userId        идентификатор пользователя
      * @param createRequest параметры запроса для создания объекта запроса
      * @return созданный запрос
      */
