@@ -2,14 +2,10 @@ package ru.practicum.shareit.server.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.item.dto.*;
 import ru.practicum.shareit.server.item.service.ItemService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.server.common.Constants.*;
@@ -17,7 +13,6 @@ import static ru.practicum.shareit.server.common.Constants.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 @RequestMapping("/items")
 public class ItemController {
 
@@ -36,8 +31,8 @@ public class ItemController {
     @GetMapping
     public List<ItemResponse> findAllByUserId(
             @RequestHeader(USER_HEADER) Long userId,
-            @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
-            @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
+            @RequestParam(defaultValue = DEFAULT_FROM) int from,
+            @RequestParam(defaultValue = DEFAULT_SIZE) int size
     ) {
         log.info("Получение списка вещей пользователя с id {}", userId);
         return itemMapper.mapToResponseEntity(service.findAllByUserId(userId, from, size));
@@ -61,14 +56,14 @@ public class ItemController {
     /**
      * Создание вещи пользователя
      *
-     * @param userId идентификатор пользователя
+     * @param userId            идентификатор пользователя
      * @param itemCreateRequest запрос на создание вещи пользователя
      * @return созданная вещь
      */
     @PostMapping
     public ItemResponse create(
             @RequestHeader(USER_HEADER) Long userId,
-            @RequestBody @Valid ItemCreateRequest itemCreateRequest
+            @RequestBody ItemCreateRequest itemCreateRequest
     ) {
         log.info("Создание пользователем {} вещи \"{}\"", userId, itemCreateRequest.getName());
         return itemMapper.mapToResponseEntity(
@@ -79,8 +74,8 @@ public class ItemController {
     /**
      * Редактирование вещи пользователя
      *
-     * @param userId идентификатор пользователя
-     * @param itemId идентификатор вещи
+     * @param userId            идентификатор пользователя
+     * @param itemId            идентификатор вещи
      * @param itemUpdateRequest параметры запросы для редактирования вещи
      * @return вещь
      */
@@ -105,8 +100,8 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemResponse> findAllByName(
             @RequestParam String text,
-            @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
-            @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
+            @RequestParam(defaultValue = DEFAULT_FROM) int from,
+            @RequestParam(defaultValue = DEFAULT_SIZE) int size
     ) {
         log.info("Получение списка вещей по названию {}", text);
         return itemMapper.mapToResponseEntity(service.findAllByName(text, from, size));
@@ -116,8 +111,8 @@ public class ItemController {
     /**
      * Создание комментарий для предмета
      *
-     * @param userId идентификатор пользователя брони
-     * @param itemId идентификатор предмета
+     * @param userId               идентификатор пользователя брони
+     * @param itemId               идентификатор предмета
      * @param commentCreateRequest параметры запроса комментарий
      * @return созданный комментарий
      */
@@ -125,7 +120,7 @@ public class ItemController {
     public CommentResponse createComment(
             @RequestHeader(USER_HEADER) Long userId,
             @PathVariable long itemId,
-            @RequestBody @Valid CommentCreateRequest commentCreateRequest
+            @RequestBody CommentCreateRequest commentCreateRequest
     ) {
         log.info("Создание комментарий для предмета {}", itemId);
         return commentMapper.mapToResponseEntity(

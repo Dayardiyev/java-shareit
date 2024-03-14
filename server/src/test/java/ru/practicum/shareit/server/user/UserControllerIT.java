@@ -142,74 +142,6 @@ class UserControllerIT {
 
     @SneakyThrows
     @Test
-    void create_whenUserNameIsNull_thenBadRequestReturned() {
-        String errorMessage = "Имя пользователя не может быть пустым.";
-        userCreateRequest1.setName(null);
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(userCreateRequest1)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(userService, never()).create(any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenUserNameIsBlank_thenBadRequestReturned() {
-        String errorMessage = "Имя пользователя не может быть пустым.";
-        userCreateRequest1.setName(" ");
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(userCreateRequest1)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(userService, never()).create(any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenEmailIsNull_thenBadRequestReturned() {
-        String errorMessage = "Электронная почта не может быть пустым.";
-        userCreateRequest1.setEmail(null);
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(userCreateRequest1)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(userService, never()).create(any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenEmailIsBlank_thenBadRequestReturned() {
-        String errorMessage = "Электронная почта не может быть пустым.";
-        userCreateRequest1.setEmail(" ");
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(userCreateRequest1)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(userService, never()).create(any());
-    }
-
-    @SneakyThrows
-    @Test
     void create_whenEmailAlreadyUsed_thenBadRequestReturned() {
         String errorMessage = "Электронный адрес уже используется.";
 
@@ -229,23 +161,6 @@ class UserControllerIT {
 
     @SneakyThrows
     @Test
-    void create_whenEmailInvalid_thenBadRequestReturned() {
-        String errorMessage = "Электронная почта не соответствует формату \"user@mail.com\".";
-        userCreateRequest1.setEmail("incorrect email format@");
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(userCreateRequest1)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(userService, never()).create(any());
-    }
-
-    @SneakyThrows
-    @Test
     void update_whenValidUserUpdateRequest_thenOkReturned() {
         long userId = 1L;
 
@@ -257,24 +172,6 @@ class UserControllerIT {
                 .andExpect(status().isOk());
 
         verify(userService).update(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void update_whenInvalidEmail_thenBadRequestReturned() {
-        String errorMessage = "Электронная почта не соответствует формату \"user@mail.com\".";
-        long userId = 1L;
-        userUpdateRequest1.setEmail("invalid email format@.com");
-
-        mockMvc.perform(patch("/users/{id}", userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .content(objectMapper.writeValueAsString(userUpdateRequest1)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(userService, never()).update(anyLong(), any());
     }
 
     @SneakyThrows

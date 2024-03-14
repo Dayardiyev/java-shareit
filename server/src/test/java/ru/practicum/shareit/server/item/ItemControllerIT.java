@@ -3,7 +3,6 @@ package ru.practicum.shareit.server.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,54 +126,6 @@ class ItemControllerIT {
 
     @SneakyThrows
     @Test
-    void getByUserId_whenNegativeFromInParameter_thenBadRequestReturned() {
-        long userId = owner.getId();
-        int from = -1;
-        int size = 50;
-        String errorMessage = "must be greater than or equal to 0";
-
-        when(itemService.findAllByUserId(userId, from, size))
-                .thenReturn(List.of(item));
-
-        mockMvc.perform(get("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .param("from", Integer.toString(from))
-                        .param("size", Integer.toString(size)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).findAllByUserId(userId, from, size);
-    }
-
-    @SneakyThrows
-    @Test
-    void getByUserId_whenZeroSizeInParameter_thenBadRequestReturned() {
-        long userId = owner.getId();
-        int from = 0;
-        int size = 0;
-        String errorMessage = "must be greater than 0";
-
-        when(itemService.findAllByUserId(userId, from, size))
-                .thenReturn(List.of(item));
-
-        mockMvc.perform(get("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .param("from", Integer.toString(from))
-                        .param("size", Integer.toString(size)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).findAllByUserId(userId, from, size);
-    }
-
-    @SneakyThrows
-    @Test
     void getById_whenValidRequest_thenItemReturned() {
         long userId = owner.getId();
         long itemId = item.getId();
@@ -264,116 +215,6 @@ class ItemControllerIT {
 
     @SneakyThrows
     @Test
-    void create_whenNameIsNull_thenBadRequestReturned() {
-        long userId = 1L;
-        String errorMessage = "Название вещи не должно быть пустым";
-        itemCreateRequest.setName(null);
-
-        when(itemService.create(anyLong(), any()))
-                .thenReturn(item);
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .content(objectMapper.writeValueAsString(itemCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).create(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenNameIsBlank_thenBadRequestReturned() {
-        long userId = 1L;
-        String errorMessage = "Название вещи не должно быть пустым";
-        itemCreateRequest.setName(" ");
-
-        when(itemService.create(anyLong(), any()))
-                .thenReturn(item);
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .content(objectMapper.writeValueAsString(itemCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).create(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenDescriptionIsNull_thenBadRequestReturned() {
-        long userId = 1L;
-        String errorMessage = "Описание вещи не должно быть пустым";
-        itemCreateRequest.setDescription(null);
-
-        when(itemService.create(anyLong(), any()))
-                .thenReturn(item);
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .content(objectMapper.writeValueAsString(itemCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).create(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenDescriptionIsBlank_thenBadRequestReturned() {
-        long userId = 1L;
-        String errorMessage = "Описание вещи не должно быть пустым";
-        itemCreateRequest.setDescription(" ");
-
-        when(itemService.create(anyLong(), any()))
-                .thenReturn(item);
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .content(objectMapper.writeValueAsString(itemCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).create(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenAvailableIsNull_thenBadRequestReturned() {
-        long userId = 1L;
-        String errorMessage = "Признак доступности вещи не может быть пустым.";
-        itemCreateRequest.setAvailable(null);
-
-        when(itemService.create(anyLong(), any()))
-                .thenReturn(item);
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .content(objectMapper.writeValueAsString(itemCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).create(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
     void update_whenValidRequest_thenUpdatedItemReturned() {
         long userId = 1L;
         long itemId = 1L;
@@ -448,58 +289,6 @@ class ItemControllerIT {
 
     @SneakyThrows
     @Test
-    void search_whenNegativeFromInParameter_thenBadRequestReturned() {
-        long userId = 1L;
-        int from = -1;
-        int size = 50;
-        String substring = "text";
-        String errorMessage = "must be greater than or equal to 0";
-
-        when(itemService.findAllByName(substring, from, size))
-                .thenReturn(List.of(item));
-
-        mockMvc.perform(get("/items/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .param("text", substring)
-                        .param("from", Integer.toString(from))
-                        .param("size", Integer.toString(size)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).findAllByName(substring, from, size);
-    }
-
-    @SneakyThrows
-    @Test
-    void search_whenZeroSizeInParameter_thenBadRequestReturned() {
-        long userId = 1L;
-        int from = 1;
-        int size = 0;
-        String substring = "text";
-        String errorMessage = "must be greater than 0";
-
-        when(itemService.findAllByName(substring, from, size))
-                .thenReturn(List.of(item));
-
-        mockMvc.perform(get("/items/search")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .param("text", substring)
-                        .param("from", Integer.toString(from))
-                        .param("size", Integer.toString(size)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).findAllByName(substring, from, size);
-    }
-
-    @SneakyThrows
-    @Test
     void addComment_whenValidRequest_thenListOfItemReturned() {
         long userId = 1L;
         long itemId = 1L;
@@ -541,51 +330,6 @@ class ItemControllerIT {
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString(errorMessage)));
 
-        verify(itemService, never()).addComment(anyLong(), anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void addComment_whenTextIsNull_thenBadRequestReturned() {
-        long userId = 1L;
-        long itemId = 1L;
-        String errorMessage = "Текст комментарий не должен быть пустым";
-        commentCreateRequest.setText(null);
-
-        when(itemService.addComment(anyLong(), anyLong(), any()))
-                .thenReturn(comment);
-
-        mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .content(objectMapper.writeValueAsString(commentCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemService, never()).addComment(anyLong(), anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void addComment_whenTextIsBlank_thenBadRequestReturned() {
-        long userId = 1L;
-        long itemId = 1L;
-        String errorMessage = "Текст комментарий не должен быть пустым";
-        commentCreateRequest.setText(" ");
-
-        when(itemService.addComment(anyLong(), anyLong(), any()))
-                .thenReturn(comment);
-
-        mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(USER_HEADER, userId)
-                        .content(objectMapper.writeValueAsString(commentCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
         verify(itemService, never()).addComment(anyLong(), anyLong(), any());
     }
 

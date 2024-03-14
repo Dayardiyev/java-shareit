@@ -2,6 +2,7 @@ package ru.practicum.shareit.gateway.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.user.dto.UserCreateRequest;
 import ru.practicum.shareit.server.user.dto.UserUpdateRequest;
@@ -15,6 +16,7 @@ import static ru.practicum.shareit.server.common.Constants.DEFAULT_SIZE;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/users")
 public class UserController {
 

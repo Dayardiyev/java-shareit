@@ -3,7 +3,6 @@ package ru.practicum.shareit.server.request;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,44 +109,6 @@ class ItemRequestControllerIT {
 
     @SneakyThrows
     @Test
-    void create_whenDescriptionIsNull_thenBadRequestReturned() {
-        long userId = 1L;
-        String errorMessage = "Описание не может быть пустым";
-        itemRequestCreateRequest.setDescription(null);
-
-        mockMvc.perform(post("/requests")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header("X-Sharer-User-Id", userId)
-                        .content(objectMapper.writeValueAsString(itemRequestCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemRequestService, never()).create(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenDescriptionIsBlank_thenBadRequestReturned() {
-        long userId = 1L;
-        String errorMessage = "Описание не может быть пустым";
-        itemRequestCreateRequest.setDescription(" ");
-
-        mockMvc.perform(post("/requests")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header("X-Sharer-User-Id", userId)
-                        .content(objectMapper.writeValueAsString(itemRequestCreateRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemRequestService, never()).create(anyLong(), any());
-    }
-
-    @SneakyThrows
-    @Test
     void getAllMyRequests_whenValidRequest_thenListOfItemRequestReturned() {
         long userId = 1L;
 
@@ -214,48 +175,6 @@ class ItemRequestControllerIT {
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andExpect(status().isBadRequest())
                 .andExpect(status().reason(containsString(errorMessage)));
-
-        verify(itemRequestService, never()).findAll(anyLong(), anyInt(), anyInt());
-    }
-
-    @SneakyThrows
-    @Test
-    void getAllNotMyRequests_whenNegativeFromInParameter_thenBadRequestReturned() {
-        long userId = 1L;
-        long from = -1;
-        int size = 50;
-        String errorMessage = "must be greater than or equal to 0";
-
-        mockMvc.perform(get("/requests/all")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", Long.toString(from))
-                        .param("size", Integer.toString(size)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
-
-        verify(itemRequestService, never()).findAll(anyLong(), anyInt(), anyInt());
-    }
-
-    @SneakyThrows
-    @Test
-    void getAllNotMyRequests_whenZeroSizeInParameter_thenBadRequestReturned() {
-        long userId = 1L;
-        long from = 10;
-        int size = 0;
-        String errorMessage = "must be greater than 0";
-
-        mockMvc.perform(get("/requests/all")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header("X-Sharer-User-Id", userId)
-                        .param("from", Long.toString(from))
-                        .param("size", Integer.toString(size)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", Matchers.containsString(errorMessage)));
 
         verify(itemRequestService, never()).findAll(anyLong(), anyInt(), anyInt());
     }

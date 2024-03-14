@@ -2,7 +2,6 @@ package ru.practicum.shareit.server.booking.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.booking.dto.BookingCreateRequest;
 import ru.practicum.shareit.server.booking.dto.BookingMapper;
@@ -10,9 +9,6 @@ import ru.practicum.shareit.server.booking.dto.BookingResponse;
 import ru.practicum.shareit.server.booking.model.BookingState;
 import ru.practicum.shareit.server.booking.service.BookingService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.server.common.Constants.*;
@@ -20,7 +16,6 @@ import static ru.practicum.shareit.server.common.Constants.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
 
@@ -30,8 +25,8 @@ public class BookingController {
     /**
      * Получение бронирования по идентификатору
      *
-     * @param userId идентификатор пользователя может относиться к пользователю,
-     *               который бронирует, или к владельцу вещи.
+     * @param userId    идентификатор пользователя может относиться к пользователю,
+     *                  который бронирует, или к владельцу вещи.
      * @param bookingId идентификатор бронирования
      * @return найденное бронирование
      */
@@ -47,25 +42,25 @@ public class BookingController {
     /**
      * Получение списка по бронированию пользователя
      *
-     * @param bookerId идентификатор пользователя
+     * @param bookerId    идентификатор пользователя
      * @param stateFilter состояние бронирования, возможные значения
-     *              <ul>
-     *                  <li>ALL</li>
-     *                  <li>CURRENT</li>
-     *                  <li>PAST</li>
-     *                  <li>FUTURE</li>
-     *                  <li>WAITING</li>
-     *                  <li>APPROVED</li>
-     *                  <li>REJECTED</li>
-     *              </ul>
+     *                    <ul>
+     *                        <li>ALL</li>
+     *                        <li>CURRENT</li>
+     *                        <li>PAST</li>
+     *                        <li>FUTURE</li>
+     *                        <li>WAITING</li>
+     *                        <li>APPROVED</li>
+     *                        <li>REJECTED</li>
+     *                    </ul>
      * @return найденные бронирования
      */
     @GetMapping
     public List<BookingResponse> findAllByBookerId(
             @RequestHeader(USER_HEADER) Long bookerId,
             @RequestParam(value = "state", defaultValue = "ALL") String stateFilter,
-            @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
-            @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
+            @RequestParam(defaultValue = DEFAULT_FROM) int from,
+            @RequestParam(defaultValue = DEFAULT_SIZE) int size
 
     ) {
         log.info("Получение списка по бронированию пользователя {}", bookerId);
@@ -76,25 +71,25 @@ public class BookingController {
     /**
      * Получение списка по бронированию владельца предмета
      *
-     * @param ownerId идентификатор владельца предмета
+     * @param ownerId     идентификатор владельца предмета
      * @param stateFilter состояние бронирования, возможные значения
-     *              <ul>
-     *                  <li>ALL</li>
-     *                  <li>CURRENT</li>
-     *                  <li>PAST</li>
-     *                  <li>FUTURE</li>
-     *                  <li>WAITING</li>
-     *                  <li>APPROVED</li>
-     *                  <li>REJECTED</li>
-     *              </ul>
+     *                    <ul>
+     *                        <li>ALL</li>
+     *                        <li>CURRENT</li>
+     *                        <li>PAST</li>
+     *                        <li>FUTURE</li>
+     *                        <li>WAITING</li>
+     *                        <li>APPROVED</li>
+     *                        <li>REJECTED</li>
+     *                    </ul>
      * @return найденные бронирования
      */
     @GetMapping("/owner")
     public List<BookingResponse> findAllByOwnerId(
             @RequestHeader(USER_HEADER) Long ownerId,
             @RequestParam(value = "state", defaultValue = "ALL") String stateFilter,
-            @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
-            @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
+            @RequestParam(defaultValue = DEFAULT_FROM) int from,
+            @RequestParam(defaultValue = DEFAULT_SIZE) int size
     ) {
         log.info("Получение списка по бронированию владельца предмета ownerId={}", ownerId);
         BookingState state = BookingState.parse(stateFilter);
@@ -104,14 +99,14 @@ public class BookingController {
     /**
      * Создание бронирования
      *
-     * @param bookerId идентификатор пользователя
+     * @param bookerId             идентификатор пользователя
      * @param bookingCreateRequest параметры создания бронирования
      * @return созданный объект
      */
     @PostMapping
     public BookingResponse create(
             @RequestHeader(USER_HEADER) Long bookerId,
-            @RequestBody @Valid BookingCreateRequest bookingCreateRequest
+            @RequestBody BookingCreateRequest bookingCreateRequest
     ) {
         log.info("Создание бронирования пользователем с id={}", bookerId);
         return mapper.mapToResponseEntity(
@@ -122,7 +117,7 @@ public class BookingController {
     /**
      * Подтверждение или отклонение бронирования
      *
-     * @param ownerId идентификатор владельца
+     * @param ownerId   идентификатор владельца
      * @param bookingId идентификатор бронирования
      * @param available подтверждение или отклонение
      * @return изменённое бронирование

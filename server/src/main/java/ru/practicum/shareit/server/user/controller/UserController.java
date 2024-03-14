@@ -2,7 +2,6 @@ package ru.practicum.shareit.server.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.user.dto.UserCreateRequest;
 import ru.practicum.shareit.server.user.dto.UserMapper;
@@ -10,9 +9,6 @@ import ru.practicum.shareit.server.user.dto.UserResponse;
 import ru.practicum.shareit.server.user.dto.UserUpdateRequest;
 import ru.practicum.shareit.server.user.service.UserService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 import static ru.practicum.shareit.server.common.Constants.DEFAULT_FROM;
@@ -21,7 +17,6 @@ import static ru.practicum.shareit.server.common.Constants.DEFAULT_SIZE;
 @RestController
 @Slf4j
 @RequestMapping(path = "/users")
-@Validated
 @RequiredArgsConstructor
 public class UserController {
 
@@ -37,8 +32,8 @@ public class UserController {
      */
     @GetMapping
     public List<UserResponse> findAll(
-            @PositiveOrZero @RequestParam(defaultValue = DEFAULT_FROM) int from,
-            @Positive @RequestParam(defaultValue = DEFAULT_SIZE) int size
+            @RequestParam(defaultValue = DEFAULT_FROM) int from,
+            @RequestParam(defaultValue = DEFAULT_SIZE) int size
     ) {
         log.info("Получение всех пользователей");
         return mapper.mapToResponseEntity(userService.findAll(from, size));
@@ -46,6 +41,7 @@ public class UserController {
 
     /**
      * Получение пользователя по идентификатору.
+     *
      * @param id идентификатор пользователя.
      * @return найденный пользователь.
      */
@@ -57,11 +53,12 @@ public class UserController {
 
     /**
      * Создание пользователя.
+     *
      * @param userCreateRequest параметры для создания пользователя.
      * @return созданный пользователь.
      */
     @PostMapping
-    public UserResponse create(@RequestBody @Valid UserCreateRequest userCreateRequest) {
+    public UserResponse create(@RequestBody UserCreateRequest userCreateRequest) {
         log.info("Создание пользователя");
         return mapper.mapToResponseEntity(
                 userService.create(mapper.mapFromCreateRequestDto(userCreateRequest))
@@ -70,12 +67,13 @@ public class UserController {
 
     /**
      * Обновление пользователя.
-     * @param id идентификатор пользователя для обновления.
+     *
+     * @param id                идентификатор пользователя для обновления.
      * @param userUpdateRequest параметры для обновления пользователя.
      * @return обновленный пользователь.
      */
     @PatchMapping("{id}")
-    public UserResponse update(@PathVariable long id, @RequestBody @Valid UserUpdateRequest userUpdateRequest) {
+    public UserResponse update(@PathVariable long id, @RequestBody UserUpdateRequest userUpdateRequest) {
         log.info("Обновление пользователя");
         return mapper.mapToResponseEntity(
                 userService.update(id, mapper.mapFromUpdateRequestDto(userUpdateRequest))
@@ -84,6 +82,7 @@ public class UserController {
 
     /**
      * Удаление пользователя по идентификатору.
+     *
      * @param id идентификатор пользователя.
      */
     @DeleteMapping("{id}")
